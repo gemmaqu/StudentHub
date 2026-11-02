@@ -1,26 +1,27 @@
 package com.studenthub;
 
+import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-import com.redis.testcontainers.RedisContainer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 public abstract class BaseIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+    // Started once per JVM: Spring caches the context between test classes, so
+    // per-class @Container lifecycles would leave that context pointing at stopped containers.
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("studenthub_test")
             .withUsername("test")
             .withPassword("test");
 
-    @Container
-    static RedisContainer redis = new RedisContainer("redis:7-alpine");
+    static final RedisContainer redis = new RedisContainer("redis:7-alpine");
+
+    static {
+        postgres.start();
+        redis.start();
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
