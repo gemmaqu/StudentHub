@@ -102,7 +102,7 @@ Measured results, with every timing in milliseconds:
 
 At 100 req/s, caching lowered average latency by about 36% and p95 by about 51%, and read about 99.7% fewer database rows. The main benefit is less database load: with indexes in place, uncached reads are already fast.
 
-**How to read these numbers:** everything ran on one Mac under Docker Desktop, with no network delay between the app, database, and Redis. The workload is read-only with a small set of repeated queries, which favors the cache. Treat the results as a comparison on this setup, not a production prediction. The 1,000 req/s run shows lower latency mainly because it ran on a separately warmed JVM with more traffic, so compare cache off and on within a row pair, not across loads.
+**How to read these numbers:** everything ran on one Mac under Docker Desktop, with no network delay between the app, database, and Redis. The workload is read-only with a small set of repeated queries, which favors the cache. Treat the results as a comparison on this setup, not a production prediction. Latency was lower in the 1,000 req/s run than in the 100 req/s run. I did not investigate why, so compare cache off and on within one load, not across loads.
 
 ## CI/CD
 
