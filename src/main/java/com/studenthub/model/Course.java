@@ -2,6 +2,7 @@ package com.studenthub.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,4 +34,7 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Resource> resources;
+
+    @Formula("(SELECT COUNT(*) FROM resources r WHERE r.course_id = id)")
+    private Integer resourceCount;
 }

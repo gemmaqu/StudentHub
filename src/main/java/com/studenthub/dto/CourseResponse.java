@@ -1,13 +1,17 @@
 package com.studenthub.dto;
 
 import com.studenthub.model.Course;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CourseResponse {
     private Long id;
     private String code;
@@ -24,7 +28,7 @@ public class CourseResponse {
                 .name(c.getName())
                 .description(c.getDescription())
                 .department(c.getDepartment())
-                .resourceCount(c.getResources() == null ? 0 : c.getResources().size())
+                .resourceCount(c.getResourceCount() == null ? 0 : c.getResourceCount())
                 .createdAt(c.getCreatedAt())
                 .build();
     }

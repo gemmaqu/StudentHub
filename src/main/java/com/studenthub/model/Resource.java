@@ -27,11 +27,17 @@ public class Resource {
     @Column(name = "file_url", nullable = false, length = 1024)
     private String fileUrl;
 
-    @Column(name = "file_type", length = 50)
+    @Column(name = "file_type", length = 150)
     private String fileType;
 
     @Column(name = "file_size")
     private Long fileSize;
+
+    @Column(name = "storage_key", length = 64)
+    private String storageKey;
+
+    @Column(name = "original_filename")
+    private String originalFilename;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resource_type", nullable = false, length = 50)

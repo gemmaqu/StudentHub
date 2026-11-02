@@ -15,6 +15,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     boolean existsByCode(String code);
 
+    Page<Course> findByDepartment(String department, Pageable pageable);
+
     @Query("SELECT c FROM Course c WHERE " +
            "LOWER(c.name) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(c.code) LIKE LOWER(CONCAT('%', :q, '%')) OR " +

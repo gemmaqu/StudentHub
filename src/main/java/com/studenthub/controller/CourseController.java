@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,9 +25,10 @@ public class CourseController {
     @GetMapping
     @Operation(summary = "List all courses (paginated)")
     public PagedResponse<CourseResponse> list(
+            @RequestParam(required = false) String department,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return courseService.listAll(PageRequest.of(page, size, Sort.by("code")));
+        return courseService.listAll(department, Pages.of(page, size, Sort.by("code")));
     }
 
     @GetMapping("/search")
@@ -37,7 +37,7 @@ public class CourseController {
             @RequestParam String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return courseService.search(q, PageRequest.of(page, size));
+        return courseService.search(q, Pages.of(page, size, Sort.by("code")));
     }
 
     @GetMapping("/{id}")

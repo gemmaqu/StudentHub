@@ -1,5 +1,6 @@
 package com.studenthub.service;
 
+import com.studenthub.config.EvictCatalogCaches;
 import com.studenthub.dto.CourseRequest;
 import com.studenthub.dto.CourseResponse;
 import com.studenthub.dto.PagedResponse;
@@ -8,7 +9,6 @@ import com.studenthub.exception.ResourceNotFoundException;
 import com.studenthub.model.Course;
 import com.studenthub.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,9 +20,11 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
 
-    @Cacheable(value = "courses", key = "'all:' + #pageable.pageNumber + ':' + #pageable.pageSize")
-    public PagedResponse<CourseResponse> listAll(Pageable pageable) {
-        return PagedResponse.of(courseRepository.findAll(pageable), CourseResponse::from);
+    @Cacheable(value = "courses", key = "'all:' + #department + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+    public PagedResponse<CourseResponse> listAll(String department, Pageable pageable) {
+        return PagedResponse.of(
+                department == null ? courseRepository.findAll(pageable) : courseRepository.findByDepartment(department, pageable),
+                CourseResponse::from);
     }
 
     @Cacheable(value = "courses", key = "#id")
@@ -30,18 +32,19 @@ public class CourseService {
         return CourseResponse.from(findOrThrow(id));
     }
 
-    @Cacheable(value = "courses", key = "'search:' + #q + ':' + #pageable.pageNumber")
+    @Cacheable(value = "courses", key = "'search:' + #q + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
     public PagedResponse<CourseResponse> search(String q, Pageable pageable) {
         return PagedResponse.of(courseRepository.search(q, pageable), CourseResponse::from);
     }
 
     @Transactional
-    @CacheEvict(value = "courses", allEntries = true)
+    @EvictCatalogCaches
     public CourseResponse create(CourseRequest req) {
-        if (courseRepository.existsByCode(req.getCode()))
-            throw new ConflictException("Course code already exists: " + req.getCode());
+        String code = req.getCode().toUpperCase();
+        if (courseRepository.existsByCode(code))
+            throw new ConflictException("Course code already exists: " + code);
         Course course = Course.builder()
-                .code(req.getCode().toUpperCase())
+                .code(code)
                 .name(req.getName())
                 .description(req.getDescription())
                 .department(req.getDepartment())
@@ -50,7 +53,7 @@ public class CourseService {
     }
 
     @Transactional
-    @CacheEvict(value = "courses", allEntries = true)
+    @EvictCatalogCaches
     public CourseResponse update(Long id, CourseRequest req) {
         Course course = findOrThrow(id);
         course.setName(req.getName());
@@ -60,7 +63,7 @@ public class CourseService {
     }
 
     @Transactional
-    @CacheEvict(value = "courses", allEntries = true)
+    @EvictCatalogCaches
     public void delete(Long id) {
         courseRepository.delete(findOrThrow(id));
     }
